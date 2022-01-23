@@ -1,6 +1,7 @@
 import json
 import configparser
 import Crypto
+import datetime
 
 class Create_default:
 
@@ -9,6 +10,9 @@ class Create_default:
             Create_default.Create_INI(self)
         if switch == "JSON":
             Create_default.Create_JSON(self)
+        if switch == "ERROR":
+            Create_default.Create_ERROR(self)
+
 
     def Create_INI(self):
         config = configparser.ConfigParser()
@@ -49,6 +53,33 @@ class Create_default:
         }
         with open("data.json", 'w') as json_file:
             json.dump(default, json_file)
+
+    def Create_ERROR(self):
+        actual_date = datetime.datetime.now()
+        file = open("ERROR_Logs.txt", 'w')
+        file.write(str(actual_date)+" Log list created!\n")
+        for i in range(120):
+            file.write("-")
+        file.close()
+
+class Reader_ERROR:
+
+    actual_date = datetime.datetime.now()
+
+    def __init__(self):
+        try:
+            file = open("ERROR_Logs.txt", 'r')
+            file.close()
+        except:
+            Create_default.__init__(self, "ERROR")
+
+    def Create_new_log(self, log):
+        file = open("ERROR_Logs.txt", 'a')
+        file.write("\n"+str(self.actual_date)+"\n")
+        file.write(log+"\n")
+        for i in range(60):
+            file.write("-")
+        file.close()
 
 class Reader_INI:
 
