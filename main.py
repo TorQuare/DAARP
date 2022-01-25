@@ -9,8 +9,7 @@ Reader_JSON = Reader.Reader_JSON()
 #Reader.Create_default("ERROR")
 
 SQLite = SQLite_Engine.SQLite("Default.db")
-#SQLite.create_tables()
-SQLite.insert_default()
+SQLite.create_tables()
 SQLite.close_conn()
 
 #Access = ACCDB_Engine.AC_database("Test_2.accdb")
