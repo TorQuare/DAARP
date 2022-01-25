@@ -47,50 +47,39 @@ class SQLite():
                     self.cursor.execute(query[iterator][1])
                     self.con.commit()
                     iterator += 1
-            SQLite.insert_default(self)
+            SQLite.insert_default_types(self)
         except:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             self.Error_log.Create_new_log("SQLite table: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
 
-    def insert_default(self):
+    def insert_default_types(self):
         table_name = [["User_type", "Administrator", "Normal"], ["Media_type", "APP", "WEB"]]
         iterator_name = 0
         iterator = 1
-        verify = False
         try:
-            for i in table_name:
-                for j in table_name:
-                    query_user_type = "SELECT `Type` FROM `"+table_name[iterator_name][0]+\
-                                      "` WHERE `Type` = '"+table_name[iterator_name][iterator]+"'"
-                    if self.cursor:
-                        self.cursor.execute(query_user_type)
-                        self.con.commit()
-                        check = self.cursor.fetchone()
-                        try:
-                            if str(check[0]) != table_name[iterator_name][iterator]:
-                                verify = True
-                        except:
-                            verify = True
-                    iterator += 1
+            for dt in table_name:
+                query_del = "DELETE FROM `"+table_name[iterator_name][0]+"`"
+                if self.cursor:
+                    self.cursor.execute(query_del)
+                    self.con.commit()
                 iterator_name += 1
-                iterator = 1
-
-            if verify:      #jeżeli znajdują się wartości domyślne w bazie to zostaw
-                iterator_name = 0
-                iterator = 1
+            iterator_name = 0
+            for i in table_name:
                 for i in table_name:
-                    for i in table_name:
-                        query_user_type = "INSERT INTO `"+table_name[iterator_name][0]
-                        query_user_type += "`( `Type`) VALUES ('" + table_name[iterator_name][iterator] + "')"
-                        if self.cursor:
-                            self.cursor.execute(query_user_type)
-                            self.con.commit()
-                        iterator += 1
-                    iterator = 1
-                    iterator_name += 1
+                    query_insert = "INSERT INTO `"+table_name[iterator_name][0]
+                    query_insert += "`( `Type`) VALUES ('" + table_name[iterator_name][iterator] + "')"
+                    if self.cursor:
+                        self.cursor.execute(query_insert)
+                        self.con.commit()
+                    iterator += 1
+                iterator = 1
+                iterator_name += 1
         except:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             self.Error_log.Create_new_log("SQLite default: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
+
+    def create_default_admin_acc(self):
+        query = "INSERT INTO Users"
 
     def close_conn(self):
         if self.con:
