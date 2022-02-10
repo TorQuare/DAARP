@@ -13,8 +13,10 @@ SQLite = SQLite_Engine.SQLite("Default.db")
 SQLite.close_conn()
 
 User_crypto = Crypto_Engine.User_crypto()
-User_crypto.Pass_crypto_mode_hash("Patryk")
-
+#User_crypto.Pass_crypto_mode_hash("Patryk")
+User_crypto.EMG_question_AES_dec("Patryk", "4Y+fE93WI2ogW90U4OaQ9b2sIF998vSmaIeh5Ed6Ji4=")
+#4Y+fE93WI2ogW90U4OaQ9b2sIF998vSmaIeh5Ed6Ji4=
+#Ulubione zwierze?
 Engine = Engine.selector()
 Engine.Database_select()
 
