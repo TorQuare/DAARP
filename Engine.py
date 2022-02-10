@@ -1,18 +1,23 @@
 import Reader
 
-class selector:
+
+class Selector:
 
     def __init__(self):
-        self.Reader_JSON = Reader.Reader_JSON()
-        self.Reader_INI = Reader.Reader_INI()
+        self.ReaderJSON = Reader.ReaderJSON()
+        self.ReaderINI = Reader.ReaderINI()
+        self.list = "List"
+        self.default = "Default"
+        self.additional_name = "Additional_name"
 
-    def Database_select(self):
-        Last_select_name = self.Reader_INI.Check_last_database()
+    def database_select(self):
+        last_select_name = self.ReaderINI.check_last_database()
+        name_mode = "Name_mode"
         iterator = 0
-        if Last_select_name=="Default":
+        if last_select_name == self.default:
             return 0
-        for i in self.Reader_JSON.Database_list("Name_mode"):
-            name = self.Reader_JSON.config_file["List"][iterator]["Additional_name"]
-            if name==Last_select_name:
+        for i in self.ReaderJSON.database_list(name_mode):
+            name = self.ReaderJSON.config_file[self.list][iterator][self.additional_name]
+            if name == last_select_name:
                 return iterator
-            iterator+=1
+            iterator += 1
