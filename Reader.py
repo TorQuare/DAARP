@@ -2,6 +2,7 @@ import json
 import configparser
 # import Crypto
 import datetime
+import sys
 
 
 class CreateDefault:
@@ -78,7 +79,10 @@ class ReaderERROR:
         except:
             CreateDefault("ERROR")
 
-    def create_new_log(self, log):
+    def create_new_log(self, file):
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        print(exc_obj, " ", exc_tb.tb_lineno)
+        log = file + ": " + str(exc_obj) + " " + str(exc_tb.tb_lineno)
         file = open(self.file_name, 'a')
         file.write("\n"+str(self.actual_date)+"\n")
         file.write(log+"\n")

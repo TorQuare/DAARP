@@ -4,7 +4,6 @@ from Crypto.Hash import MD5, SHA256, SHA512
 from Crypto.Util import Padding
 import base64
 import Reader
-import sys
 
 
 class UserCrypto:
@@ -14,13 +13,14 @@ class UserCrypto:
         print("init")
 
     def pass_crypto_mode_hash(self, string):
+        result = None
         try:
             sha_512 = SHA512.new(data=string.encode('utf-8')).hexdigest()
             sha_256 = SHA256.new(data=string.encode('utf-8')).hexdigest()
-            UserCrypto.md5_code_return_only(sha_256 + sha_512)
+            result = UserCrypto.md5_code_return_only(sha_256 + sha_512)
         except SyntaxError:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.Error_log.create_new_log("Crypto user: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
+            self.Error_log.create_new_log("Crypto user")
+        return result
 
     @staticmethod
     def md5_code_return_only(string):
@@ -46,7 +46,7 @@ class UserCrypto:
                 iterator += 1
         return iv.encode('utf-8')
 
-    def emg_question_crypto(self, encrypt, login, string):
+    def aes_block_mode(self, encrypt, login, string):
         key = UserCrypto.md5_code_return_only(login).encode('utf-8')
         iv = UserCrypto.vector_gen(key.decode('utf-8'))
         cipher = AES.new(key, AES.MODE_CBC, iv)
@@ -60,13 +60,29 @@ class UserCrypto:
                 result = Padding.unpad(cipher.decrypt(string_enc), AES.block_size).decode('utf-8')
             return result
         except SyntaxError:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.Error_log.create_new_log("Crypto user: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
+            self.Error_log.create_new_log("Crypto user")
             return False
 
+    @staticmethod
+    def code_gen():
+        code = []
+        result = ""
+        for i in range(5):
+            if i == 0:
+                value = random.randint(1, 9)
+            else:
+                value = random.randint(0, 9)
+            code.append(value)
+            if i >= 2:
+                while code[i] == code[i-1] and code[i] == code[i-2]:
+                    code[i] = random.randint(0, 9)
+        for j in code:
+            result += str(j)
+        return result
 
-class MediaCrypto:
-    Error_log = Reader.ReaderERROR()
 
-    def __init__(self):
-        print("init")
+class MediaCrypto(UserCrypto):
+
+    def aes_stream_mode(self):
+        result = None
+        return result

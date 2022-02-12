@@ -1,14 +1,20 @@
 import os
 import sqlite3
-import sys
 import Reader
+import Crypto_Engine
+import datetime
 
 
-class SQLite:
+class SQLiteEngine:
     path = ""
     con = None
     cursor = None
     Error_log = Reader.ReaderERROR()
+    UserCrypto = Crypto_Engine.UserCrypto()
+    users_row_names = ["ID", "Name", "Password",
+                       "Emg_question", "Emg_answer",
+                       "Create_date", "Last_login_date",
+                       "Type", "Second_ID"]
 
     def __init__(self, db_name):
         self.path = os.getcwd() + "\\" + db_name
@@ -16,27 +22,49 @@ class SQLite:
         try:
             self.con = sqlite3.connect(full_path)
             self.cursor = self.con.cursor()
-        except SyntaxError:
+        except:
             self.cursor = None
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.Error_log.create_new_log("No connection to SQLite: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
-            SQLite.close_conn(self)
+            self.Error_log.create_new_log("No connection to SQLite")
+            SQLiteEngine.close_conn(self)
+
+    def query_creator(self):
+        result = None
+
+        return result
+
+    def close_conn(self):
+        if self.con:
+            self.con.close()
+
+
+class SQLDefaultCreation(SQLiteEngine):
+
+    def run_creator(self):
+        try:
+            SQLDefaultCreation.create_tables(self)
+            SQLDefaultCreation.insert_default_types(self)
+            SQLDefaultCreation.create_default_admin_acc(self)
+            SQLDefaultCreation.close_conn(self)
+        except:
+            self.cursor = None
+            self.Error_log.create_new_log("Creator")
+            SQLDefaultCreation.close_conn(self)
 
     def create_tables(self):
         iterator = 0
-        query_users = "CREATE TABLE IF NOT EXISTS Users (ID integer PRIMARY KEY AUTOINCREMENT, Name text NOT NULL, " \
-                      "Password text NOT NULL, Emg_question text NOT NULL, Emg_answer text NOT NULL, " \
-                      "Last_login_date numeric NOT NULL, Type text NOT NULL, Second_ID integer NOT NULL, " \
-                      "FOREIGN KEY (Type) REFERENCES User_type(Type));"
+        query_users = "CREATE TABLE IF NOT EXISTS Users (ID integer PRIMARY KEY AUTOINCREMENT, " \
+                      "Name text NOT NULL UNIQUE, Password text NOT NULL, Emg_question text NOT NULL, " \
+                      "Emg_answer text NOT NULL, Create_date text NOT NULL, Last_login_date text NOT NULL, " \
+                      "Type text NOT NULL, Second_ID integer NOT NULL, FOREIGN KEY (Type) REFERENCES User_type(Type));"
         query_media = "CREATE TABLE IF NOT EXISTS Media (ID integer PRIMARY KEY AUTOINCREMENT, " \
                       "User_ID integer NOT NULL, Login text NOT NULL, Password text NOT NULL, " \
                       "Name text NOT NULL, Address text NOT NULL, Last_remind_date numeric, " \
                       "Remind_acc integer, Autorun_select text NOT NULL, Type text NOT NULL, " \
                       "FOREIGN KEY (User_ID) REFERENCES Users(ID), FOREIGN KEY (Type) REFERENCES Media_type(Type));"
         query_media_type = "CREATE TABLE IF NOT EXISTS Media_type (ID integer PRIMARY KEY AUTOINCREMENT, " \
-                           "Type text NOT NULL);"
+                           "Type text NOT NULL UNIQUE);"
         query_user_type = "CREATE TABLE IF NOT EXISTS User_type (ID integer PRIMARY KEY AUTOINCREMENT, " \
-                          "Type text NOT NULL);"
+                          "Type text NOT NULL UNIQUE);"
 
         query = [["query_media_type", query_media_type], ["query_user_type", query_user_type],
                  ["query_users", query_users], ["query_media", query_media]]
@@ -47,10 +75,9 @@ class SQLite:
                     self.cursor.execute(query[iterator][1])
                     self.con.commit()
                     iterator += 1
-            SQLite.insert_default_types(self)
-        except SyntaxError:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.Error_log.create_new_log("SQLite table: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
+            SQLDefaultCreation.insert_default_types(self)
+        except:
+            self.Error_log.create_new_log("SQLite table")
 
     def insert_default_types(self):
         table_name = [["User_type", "Administrator", "Normal"], ["Media_type", "APP", "WEB"]]
@@ -74,13 +101,32 @@ class SQLite:
                     iterator += 1
                 iterator = 1
                 iterator_name += 1
-        except SyntaxError:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.Error_log.create_new_log("SQLite default: " + str(exc_obj) + " " + str(exc_tb.tb_lineno))
+        except:
+            self.Error_log.create_new_log("SQLite default")
 
     def create_default_admin_acc(self):
-        query = "INSERT INTO Users"
+        query = "INSERT INTO `Users` ( `Name`, `Password`, `Emg_question`, `Emg_answer`, " \
+                "`Create_date`, `Last_login_date`, `Type`, `Second_ID`) VALUES ( "
+        query_value_enc_log = self.UserCrypto.pass_crypto_mode_hash("Administrator")
+        query_value_emg = self.UserCrypto.aes_block_mode(True, "Admin", "Emergency")
+        date = datetime.datetime.now()  # zapis daty 02/11/22
+        # date = datetime.date.today()  # alternatywny zapis daty 2022-02-11
+        today = date.strftime("%x")
+        today_time = date.strftime("%x %X")
+        try:
+            query += "'" + query_value_enc_log + "', '" + query_value_enc_log + "', '" + query_value_emg + \
+                     "', '" + query_value_emg + ", '" + str(today) + \
+                     "', '" + str(today_time) + "', 'Administrator', 11111)"
+            if self.cursor:
+                self.cursor.execute(query)
+                self.con.commit()
+        except:
+            self.Error_log.create_new_log("SQLite default")
+            SQLDefaultCreation.manual_delete(self)
 
-    def close_conn(self):
-        if self.con:
-            self.con.close()
+    def manual_delete(self):
+        query = "DELETE FROM `Users`"
+        if self.cursor:
+            self.cursor.execute(query)
+            self.con.commit()
+            print("MANUAL DELETE")
