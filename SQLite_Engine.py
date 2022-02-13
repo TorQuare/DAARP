@@ -107,16 +107,17 @@ class SQLDefaultCreation(SQLiteEngine):
     def create_default_admin_acc(self):
         query = "INSERT INTO `Users` ( `Name`, `Password`, `Emg_question`, `Emg_answer`, " \
                 "`Create_date`, `Last_login_date`, `Type`, `Second_ID`) VALUES ( "
+        query_second_id = "11111"
         query_value_enc_log = self.UserCrypto.pass_crypto_mode_hash("Administrator")
-        query_value_emg = self.UserCrypto.aes_block_mode(True, "Admin", "Emergency")
+        query_value_emg = self.UserCrypto.aes_block_mode(True, query_second_id, "Emergency")
         date = datetime.datetime.now()  # zapis daty 02/11/22
         # date = datetime.date.today()  # alternatywny zapis daty 2022-02-11
         today = date.strftime("%x")
         today_time = date.strftime("%x %X")
         try:
             query += "'" + query_value_enc_log + "', '" + query_value_enc_log + "', '" + query_value_emg + \
-                     "', '" + query_value_emg + ", '" + str(today) + \
-                     "', '" + str(today_time) + "', 'Administrator', 11111)"
+                     "', '" + query_value_emg + "', '" + str(today) + \
+                     "', '" + str(today_time) + "', 'Administrator', " + query_second_id + ")"
             if self.cursor:
                 self.cursor.execute(query)
                 self.con.commit()

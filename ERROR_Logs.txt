@@ -81,3 +81,18 @@ SQLite default: near "02": syntax error 110
 2022-02-11 23:35:10.564402
 SQLite default: near "02": syntax error 110: near "02": syntax error 110
 ------------------------------------------------------------
+2022-02-12 16:43:58.676195
+SQLite default: near "02": syntax error 121
+------------------------------------------------------------
+2022-02-12 16:48:45.141741
+SQLite default: UNIQUE constraint failed: Users.Name 121
+------------------------------------------------------------
+2022-02-12 17:16:07.762407
+SQLite default: UNIQUE constraint failed: Users.Name 121
+------------------------------------------------------------
+2022-02-12 17:18:32.233102
+SQLite default: UNIQUE constraint failed: Users.Name 121
+------------------------------------------------------------
+2022-02-12 17:21:18.503698
+SQLite default: UNIQUE constraint failed: Users.Name 121
+------------------------------------------------------------
