@@ -61,7 +61,7 @@ class UserCrypto:
             return result
         except SyntaxError:
             self.Error_log.create_new_log("Crypto user")
-            return False    # wymyślić globalny problem w razie exception
+            return False  # wymyślić globalny problem w razie exception
         except ValueError:
             print("Inncorrect key aes_block_mode")
             return False
@@ -77,7 +77,7 @@ class UserCrypto:
                 value = random.randint(0, 9)
             code.append(value)
             if i >= 2:
-                while code[i] == code[i-1] and code[i] == code[i-2]:
+                while code[i] == code[i - 1] and code[i] == code[i - 2]:
                     code[i] = random.randint(0, 9)
         for j in code:
             result += str(j)
@@ -99,9 +99,9 @@ class MediaCrypto(UserCrypto):
                 result = cipher.decrypt(string_enc).decode('utf-8')
         except SyntaxError:
             self.Error_log.create_new_log("Crypto user")
-            return False    # wymyślić globalny problem w razie exception
+            return False  # wymyślić globalny problem w razie exception
         except ValueError:
-            print("Inncorrect key aes_block_mode")
+            print("Inncorrect key aes_stream_mode")
             return False
         return result
 
@@ -109,7 +109,6 @@ class MediaCrypto(UserCrypto):
     def key_code_shaker(code):
         result = ""
         code_array = list(map(int, str(code)))
-        print(code_array)
         pre_code = []
         key_code = []
         pre_code_iterator = 0
@@ -122,7 +121,7 @@ class MediaCrypto(UserCrypto):
                 if code_array[0] >= 10:
                     code_array[0] -= 8
             flag += 1
-            if flag > 10:       # flaga blokująca niesończoną pętle
+            if flag > 10:  # flaga blokująca niesończoną pętle
                 flag_ex = True
                 break
             for value in range(4):
@@ -137,7 +136,7 @@ class MediaCrypto(UserCrypto):
                     elif code_array[0] % value == 1:
                         for i in code_array:
                             if code_array[iterator] % value == 1:
-                                pre_code.append(i*2)
+                                pre_code.append(i * 2)
                                 if pre_code[pre_code_iterator] >= 10:
                                     pre_code[pre_code_iterator] = pre_code[pre_code_iterator] - 9
                                 pre_code_iterator += 1
@@ -162,7 +161,6 @@ class MediaCrypto(UserCrypto):
             return False
         for i in key_code:
             result += str(int(i))
-        print(result)
         return result
 
     @staticmethod
@@ -172,32 +170,135 @@ class MediaCrypto(UserCrypto):
             result = MediaCrypto.md5_code_return_only(result)
         return result
 
-    def enc_string_generator(self, encrypt, code, login, string):
+    # metoda zwracająca specjalny znak który zostanie dodany
+    @staticmethod
+    def ascii_mark_string(index, code):
+        add_method = 0
+        add_symbol_value = 0
+        ascii_add_method = [[33, 47], [58, 64], [91, 96], [123, 126]]
+        for i in range(6):
+            if i != 0 and i != 1:
+                if index % i == 0:
+                    add_method += 1
+            if add_method > 3:
+                add_method = 2
+        add_method -= 1
+        flag = 0
+        while add_symbol_value < ascii_add_method[add_method][0]:
+            add_symbol_value = ascii_add_method[add_method][1] - code
+            if add_symbol_value < ascii_add_method[add_method][0]:
+                add_symbol_value += 2
+            if flag > 10:
+                add_symbol_value = ascii_add_method[add_method][1]
+                break
+            flag += 1
+        return chr(add_symbol_value)
+
+    @staticmethod
+    def add_to_string(mark_flag, index, code, string):
+        key_code = list(map(int, str(code)))
+        sorted_key_code = list(map(int, str(code)))
+        sorted_key_code.sort()
+        value = index
+        result = string
+        ascii_add_method = [[48, 57], [65, 90], [97, 122]]
+        ascii_key_mode = []
+        iterator = 0
+        if mark_flag:
+            mark = MediaCrypto.ascii_mark_string(index, key_code[1])
+        else:
+            pre_mark = MediaCrypto.ascii_mark_string(index, key_code[2])
+            mark = pre_mark + str(index) + pre_mark
+            value += 1
+        for i in key_code:
+            value += i
+        result += mark
+        for i in range(sorted_key_code[3]):
+            if value % 2 == 0 or value % 3 == 1:
+                ascii_key_mode.append(1)
+                value -= 3
+            elif value % 3 == 0 or value % 2 == 1:
+                ascii_key_mode.append(2)
+                value += 5
+            else:
+                ascii_key_mode.append(0)
+                value = value * 2
+        for i in ascii_key_mode:
+            if i == 0:
+                result += chr(ascii_add_method[i][0] + key_code[iterator])
+            else:
+                if key_code[iterator] * sorted_key_code[iterator] <= 25:
+                    curr_val = key_code[iterator] * sorted_key_code[iterator]
+                    result += chr(ascii_add_method[i][0]+curr_val)
+                else:
+                    result += chr(ascii_add_method[i][0]+key_code[iterator])
+            iterator += 1
+            if iterator > 4:
+                iterator = 0
+        return result
+
+    @staticmethod
+    def del_from_string(mark_flag, index, code, correct_string):
+        search_mark = list(MediaCrypto.add_to_string(mark_flag, index, code, ""))
+        string_arr = list(correct_string)
+        result = ""
+        correct_index = 0
+        mark_index = 0
+        string_index = 0
+        while mark_index != len(search_mark):
+            if search_mark[mark_index] == string_arr[string_index]:
+                mark_index += 1
+            else:
+                mark_index = 0
+            string_index += 1
+        for i in string_arr:
+            if correct_index < string_index - mark_index:
+                result += i
+            correct_index += 1
+        return result
+
+    def test_enc(self, encrypt, code, login, string):
         key_code = list(map(int, str(MediaCrypto.key_code_shaker(code))))
         login_32 = []
-        for i in key_code:
-            login_32.append(MediaCrypto.login_code_gen(i, login))
-        key_code.sort()
-        step = [0, 2, 1]
-        key_code[1] = int(key_code[1] / 2)
-        key_code[0] = key_code[2] % 3
-        if key_code[0] == 0:
-            key_code[0] += 1
+        step = [2, 1, 0]
         if encrypt:
             step.sort()
-        for j in step:
-            if j == 0:
-                for i in range(key_code[1]):  # AES_stream_mode
-                    string = MediaCrypto.aes_stream_mode(self, encrypt, login_32[j], string)
-            if j == 1:
-                print(string, "  ", len(string))
-                string = MediaCrypto.aes_block_mode(self, encrypt, login_32[j], string)
-            if j == 2:
-                for i in range(key_code[0]):
-                    if len(string) < 200 or not encrypt:
-                        try:
-                            string = MediaCrypto.aes_stream_mode(self, encrypt, login_32[j], string)
-                        except:
-                            break
-        print(string, "  ", len(string), "  ", key_code)
+        value = 0
+        stream_iteration = 2
+        for i in key_code:
+            login_32.append(MediaCrypto.login_code_gen(i, login))
+            value += i
+        key_code.sort()
+        if value % 2 == 0:
+            block_iteration = stream_iteration
+        elif value % 3 == 0:
+            stream_iteration += 1
+            block_iteration = 1
+        else:
+            block_iteration = 1
+        for i in step:
+            if i == 0:
+                for j in range(stream_iteration):
+                    string = MediaCrypto.aes_stream_mode(self, encrypt, login_32[0], string)
+            if i == 1:
+                for j in range(block_iteration):
+                    string = MediaCrypto.aes_block_mode(self, encrypt, login_32[1], string)
+            if i == 2 and block_iteration < 2:
+                for j in range(stream_iteration - 1):
+                    string = MediaCrypto.aes_stream_mode(self, encrypt, login_32[2], string)
         return string
+
+    def enc_string_gen(self, encrypt, code, index, login, string):
+        result = ""
+        correct_string = string
+        mark_flag = True
+        if encrypt:
+            while len(result) < 160:
+                result = MediaCrypto.test_enc(self, encrypt, code, login, correct_string)
+                if len(result) < 160:
+                    correct_string = MediaCrypto.add_to_string(mark_flag, index, code, correct_string)
+                    mark_flag = False
+        if not encrypt:
+            correct_string = MediaCrypto.test_enc(self, encrypt, code, login, correct_string)
+            result = MediaCrypto.del_from_string(mark_flag, index, code, correct_string)
+        return result

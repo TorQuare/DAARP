@@ -13,11 +13,6 @@ SQLite = SQLite_Engine.SQLDefaultCreation("Default.db")
 
 UserCrypto = Crypto_Engine.UserCrypto()
 MediaCrypto = Crypto_Engine.MediaCrypto()
-MediaCrypto.enc_string_generator(True, UserCrypto.code_gen(), "Mateusz", "Pa na toffffffffffffffffffffffffff af / 2156*")
-# MediaCrypto.key_code_shaker(23383)
-# MediaCrypto.enc_string_generator(False, 24679, "Mateusz", "llJ1K4MMcuGuTYehctnib7ksR1FNyyjNkU0P54adwYJvWqfpdBnboXrStoDADyiMZS0T0WNGjQw/VB4Z8Kiet94IBszklu2Bt9zmnexDLNKuwBNKNxdgYA==")
-# MediaCrypto.aes_stream_mode(True, "5ba479b903e6a9dc5063b625ac33d723", "Patryk")
-# MediaCrypto.aes_stream_mode(False, "5ba479b903e6a9dc5063b625ac33d722", "GTWamcoz")
 
 Engine = Engine.Selector()
 Engine.database_select()
