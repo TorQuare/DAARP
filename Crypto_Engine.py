@@ -10,7 +10,7 @@ class UserCrypto:
     Error_log = Reader.ReaderERROR()
 
     def __init__(self):
-        print("init")
+        self.check = True
 
     def pass_crypto_mode_hash(self, string):
         result = None

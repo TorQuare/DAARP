@@ -27,10 +27,44 @@ class SQLiteEngine:
             self.Error_log.create_new_log("No connection to SQLite")
             SQLiteEngine.close_conn(self)
 
-    def query_creator(self):
-        result = None
-
+    @staticmethod
+    def query_creator(query_id, table_id, values, split_method):
+        query = ["SELECT * FROM", "INSERT INTO", "DELETE FROM", "WHERE", "VALUES"]
+        table_values = [
+            " Users", " Media", [
+                "ID", "Name", "Password",
+                "Emg_question", "Emg_answer",
+                "Create_date", "Last_login_date",
+                "Type", "Second_ID"
+            ], [
+                "ID", "User_ID", "Login",
+                "Password", "Name", "Address",
+                "Last_remind_date", "Remind_acc",
+                "Autorun_select", "Type"
+            ]
+        ]
+        values_arr = values.split(split_method)
+        result = ""
+        result += query[query_id] + table_values[table_id] + " ( "
+        table_id += 2
+        print(len(table_values[table_id]), "  ", len(values_arr))
+        print(table_values[table_id])
+        for i in table_values[table_id]:
+            if len(values_arr) == len(table_values[table_id]):
+                if i == table_values[table_id][len(table_values[table_id])-1]:
+                    result += i + ")"
+                    break
+                result += i + ", "
+        print(result)
         return result
+
+    def select_user_data(self):
+        val = []
+        vals = ""
+        for i in range(8):
+            vals += "asb"
+        vals += "fas"
+        result = SQLiteEngine.query_creator(1, 0, vals)
 
     def close_conn(self):
         if self.con:

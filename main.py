@@ -9,6 +9,7 @@ ReaderJSON = Reader.ReaderJSON()
 ReaderERROR = Reader.ReaderERROR()
 
 SQLite = SQLite_Engine.SQLDefaultCreation("Default.db")
+SQLite.select_user_data()
 # SQLite.run_creator()
 
 UserCrypto = Crypto_Engine.UserCrypto()
