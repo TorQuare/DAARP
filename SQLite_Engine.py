@@ -3,6 +3,7 @@ import sqlite3
 import Reader
 import Crypto_Engine
 import datetime
+import Query_Builder
 
 
 class SQLiteEngine:
@@ -11,12 +12,13 @@ class SQLiteEngine:
     cursor = None
     Error_log = Reader.ReaderERROR()
     UserCrypto = Crypto_Engine.UserCrypto()
-    users_row_names = ["ID", "Name", "Password",
-                       "Emg_question", "Emg_answer",
-                       "Create_date", "Last_login_date",
-                       "Type", "Second_ID"]
 
-    def __init__(self, db_name):
+    def __init__(self, db_name=None):
+        self.query = Query_Builder.Builder(True)
+        if db_name:
+            SQLiteEngine.con_cursor_creator(self, db_name)
+
+    def con_cursor_creator(self, db_name):
         self.path = os.getcwd() + "\\" + db_name
         full_path = self.path.rstrip()
         try:
@@ -27,44 +29,14 @@ class SQLiteEngine:
             self.Error_log.create_new_log("No connection to SQLite")
             SQLiteEngine.close_conn(self)
 
-    @staticmethod
-    def query_creator(query_id, table_id, values, split_method):
-        query = ["SELECT * FROM", "INSERT INTO", "DELETE FROM", "WHERE", "VALUES"]
-        table_values = [
-            " Users", " Media", [
-                "ID", "Name", "Password",
-                "Emg_question", "Emg_answer",
-                "Create_date", "Last_login_date",
-                "Type", "Second_ID"
-            ], [
-                "ID", "User_ID", "Login",
-                "Password", "Name", "Address",
-                "Last_remind_date", "Remind_acc",
-                "Autorun_select", "Type"
-            ]
-        ]
-        values_arr = values.split(split_method)
-        result = ""
-        result += query[query_id] + table_values[table_id] + " ( "
-        table_id += 2
-        print(len(table_values[table_id]), "  ", len(values_arr))
-        print(table_values[table_id])
-        for i in table_values[table_id]:
-            if len(values_arr) == len(table_values[table_id]):
-                if i == table_values[table_id][len(table_values[table_id])-1]:
-                    result += i + ")"
-                    break
-                result += i + ", "
-        print(result)
-        return result
-
     def select_user_data(self):
         val = []
-        vals = ""
-        for i in range(8):
-            vals += "asb"
-        vals += "fas"
-        result = SQLiteEngine.query_creator(1, 0, vals)
+        vals = "asb"
+        for i in range(9):
+            val.append("'" + vals + str(i) + "'")
+        print(len(val))
+        # result = SQLiteEngine.query_creator(1, 0, val)
+        result = self.query.query_creator(1, 0, val)
 
     def close_conn(self):
         if self.con:
