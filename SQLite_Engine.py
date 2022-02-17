@@ -33,10 +33,10 @@ class SQLiteEngine:
         val = []
         vals = "asb"
         for i in range(9):
-            val.append("'" + vals + str(i) + "'")
+            val.append(vals + str(i))
         print(len(val))
         # result = SQLiteEngine.query_creator(1, 0, val)
-        result = self.query.query_creator(1, 0, val)
+        result = self.query.query_builder(True, False, True, val)
 
     def close_conn(self):
         if self.con:
